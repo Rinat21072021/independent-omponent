@@ -2,6 +2,7 @@ import React, {useState} from 'react';
 import './App.css';
 import {TaskType, Todolist} from './Todolist';
 import {v1} from 'uuid';
+import {AddItemForm} from "./components/AddItemForm";
 
 export type FilterValuesType = "all" | "active" | "completed";
 type TodolistType = {
@@ -45,14 +46,21 @@ function App() {
         setTasks({...tasks});
     }
 
+    const addTodolistHandler = (title: string) => {
+        let newTodolistId = v1()
+        let TodolistObj: TodolistType = {id: newTodolistId, title: title, filter: "all"}
+        setTodolists([...todolists, TodolistObj])
+        setTasks({...tasks, [newTodolistId]: []})
+    }
+
     function addTask(title: string, todolistId: string) {
         let task = {id: v1(), title: title, isDone: false};
-        //достанем нужный массив по todolistId:
         let todolistTasks = tasks[todolistId];
-        // перезапишем в этом объекте массив для нужного тудулиста копией, добавив в начало новую таску:
         tasks[todolistId] = [task, ...todolistTasks];
-        // засетаем в стейт копию объекта, чтобы React отреагировал перерисовкой
         setTasks({...tasks});
+    }
+    const adTodolistTitlte=(title:string,todolistId: string)=>{
+        setTodolists(todolists.map(m=>m.id===todolistId ? {...m, title:title}:m))
     }
 
     function changeStatus(id: string, isDone: boolean, todolistId: string) {
@@ -85,8 +93,12 @@ function App() {
         setTasks({...tasks});
     }
 
+    const udTask = (title: string, todolistId: string, id:string) => {
+        setTasks({...tasks,[todolistId]:tasks[todolistId].map(m=>m.id===id ? {...m, title:title}:m)})
+    }
     return (
         <div className="App">
+            <AddItemForm callback={addTodolistHandler}/>
             {
                 todolists.map(tl => {
                     let allTodolistTasks = tasks[tl.id];
@@ -110,6 +122,8 @@ function App() {
                         changeTaskStatus={changeStatus}
                         filter={tl.filter}
                         removeTodolist={removeTodolist}
+                        udTask={udTask}
+                        adTodolistTitlte={adTodolistTitlte}
                     />
                 })
             }
